@@ -11,6 +11,16 @@ const signToken = id=> {
     })
     return token;
 }
+const sendToken = (user,statusCode ,res ) =>{
+    const token =signToken(user._id);
+    res.status(statusCode).json({
+        status : 'success' ,
+        token,
+        data :{
+            user
+        }
+    })
+}
 exports.signup = catchAsync(async (req ,res ,next) =>{
     const newUser= await User.create({
         name : req.body.name ,
@@ -19,14 +29,7 @@ exports.signup = catchAsync(async (req ,res ,next) =>{
         passwordConfirm : req.body.passwordConfirm ,
         passwordChangedAt : req.body.passwordChangedAt
     });
-    const token =signToken(newUser._id);
-    res.status(201).json({
-        status : 'success' ,
-        token,
-        data :{
-            user : newUser
-        }
-    })
+    sendToken(newUser,201,res);
 });
 
 exports.login =catchAsync(async (req , res  , next) =>{
@@ -39,11 +42,8 @@ exports.login =catchAsync(async (req , res  , next) =>{
         return  next(new appError('Incorrect email or password' , 401));
     }
 
-    const token =signToken(user._id);
-    res.status(200).json({
-        status :'success',
-        token
-    })
+    sendToken(user,200,res);
+
 
 });
 
@@ -56,9 +56,10 @@ exports.protect = catchAsync(async (req , res , next ) =>{
     if (!token){
         return next(new appError('You are not logged in' , 401));
     }
+    // console.log(token);
     //verification token
     const decoded = await promisify(jwt.verify)(token , process.env.JWT_SECRETKEY);
-    console.log(decoded);
+    // console.log(decoded);
     const uuser =await User.findById(decoded.id);
     if (!uuser){
         return next(new appError('the user belonging to this token does no longer exist.',401));
@@ -123,12 +124,25 @@ exports.restPassword = catchAsync(async (req , res , next) =>{
     }
     user.password = req.body.password;
     user.passwordConfirm = req.body.passwordConfirm;
-    user.passwordRestToken = undefined;
-    user.passwordRestExpires = undefined;
+    // user.passwordRestToken = undefined;
+    // user.passwordRestExpires = undefined;
     await user.save();
-    const token = signToken(user._id);
-    res.status(201).json({
-        status : 'success',
-        token
-    });
-})
+    sendToken(user,200,res);
+});
+
+exports.changePassword = catchAsync(async (req ,res ,next) =>{
+    const user = await User.findById(req.user).select('+password');
+    if (!user){
+        return next(new appError('Token is invalid or has expired',400))
+    }
+
+    if (!user.correctPassword(req.body.oldpassword,user.password)){
+        return next(new appError('The old password is wrong'));
+    }
+
+    user.password = req.body.newPassword;
+    user.passwordConfirm = req.body.newPasswordConfirm;
+    await user.save();
+
+    sendToken(user,200,res);
+});

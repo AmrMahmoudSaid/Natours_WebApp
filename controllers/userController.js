@@ -1,5 +1,16 @@
 const User = require('../models/userModel');
 const catchAsync =require ('../utilities/catchAsync');
+const appError = require('../utilities/appError');
+
+const filterObj = (obj , ...allowedFiled) =>{
+    const nweObject = {};
+    Object.keys(obj).forEach(ele=> {
+        if(allowedFiled.includes(ele)){
+            nweObject[ele] = obj[ele];
+        }
+    })
+    return nweObject;
+}
 
 exports.gerAlluser = catchAsync(async (req ,res , next) =>{
     const users = await User.find();
@@ -11,6 +22,22 @@ exports.gerAlluser = catchAsync(async (req ,res , next) =>{
         }
     });
 });
+
+exports.updateMe = catchAsync(async(req , res ,next)=>{
+    if (req.body.password || req.body.passwordConfirm){
+        return next(new appError('This route is not for password updates. please use /changePassword', 400));
+    }
+    const filterBodyObj = filterObj(req.body , 'name' , 'email');
+    const updateUser = await User.findByIdAndUpdate(req.user._id,filterBodyObj,{
+        runValidators : true ,
+        new : true
+    });
+    res.status(200).json({
+        status : "success",
+        user : updateUser
+    });
+});
+
 
 exports.creatUser =(req ,res) =>{
     const  newID = users[users.length-1].id+1;
