@@ -21,6 +21,7 @@ const handelJsonWebTokenError = () =>{
 }
 const handelJWTexpired = () => new appError('your token is expired. please login again' , 401);
 const sendErrorForDev = (err , res) =>{
+    console.log(err);
     res.status(err.statusCode).json({
         status: err.status ,
         error : err ,

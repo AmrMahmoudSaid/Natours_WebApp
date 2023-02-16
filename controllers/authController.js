@@ -1,9 +1,16 @@
 const jwt  = require('jsonwebtoken');
+const crypto = require('crypto');
 const {promisify} = require('util'); // to make promises
 const User = require('../models/userModel')
 const catchAsync =require('../utilities/catchAsync');
 const appError = require('../utilities/appError');
 const sendEmail = require('../utilities/email');
+const signToken = id=> {
+    const token = jwt.sign({ id }, process.env.JWT_SECRETKEY,{
+        expiresIn: process.env.JWT_EXPIRES_IN
+    })
+    return token;
+}
 exports.signup = catchAsync(async (req ,res ,next) =>{
     const newUser= await User.create({
         name : req.body.name ,
@@ -12,9 +19,7 @@ exports.signup = catchAsync(async (req ,res ,next) =>{
         passwordConfirm : req.body.passwordConfirm ,
         passwordChangedAt : req.body.passwordChangedAt
     });
-    const token =jwt.sign({id : newUser._id}, process.env.JWT_SECRETKEY, {
-        expiresIn: process.env.JWT_EXPIRES_IN
-    });
+    const token =signToken(newUser._id);
     res.status(201).json({
         status : 'success' ,
         token,
@@ -34,9 +39,7 @@ exports.login =catchAsync(async (req , res  , next) =>{
         return  next(new appError('Incorrect email or password' , 401));
     }
 
-    const token = jwt.sign({id : user._id} , process.env.JWT_SECRETKEY , {
-        expiresIn: process.env.JWT_EXPIRES_IN
-    });
+    const token =signToken(user._id);
     res.status(200).json({
         status :'success',
         token
@@ -55,6 +58,7 @@ exports.protect = catchAsync(async (req , res , next ) =>{
     }
     //verification token
     const decoded = await promisify(jwt.verify)(token , process.env.JWT_SECRETKEY);
+    console.log(decoded);
     const uuser =await User.findById(decoded.id);
     if (!uuser){
         return next(new appError('the user belonging to this token does no longer exist.',401));
@@ -109,5 +113,22 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 });
 
 exports.restPassword = catchAsync(async (req , res , next) =>{
-
+    const hashToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+    const user = await User.findOne({
+        passwordRestToken : hashToken,
+        passwordRestExpires : { $gt : Date.now()}
+    });
+    if (!user){
+        return next(new appError('Token is invalid or has expired',400))
+    }
+    user.password = req.body.password;
+    user.passwordConfirm = req.body.passwordConfirm;
+    user.passwordRestToken = undefined;
+    user.passwordRestExpires = undefined;
+    await user.save();
+    const token = signToken(user._id);
+    res.status(201).json({
+        status : 'success',
+        token
+    });
 })
