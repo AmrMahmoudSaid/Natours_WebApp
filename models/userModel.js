@@ -75,6 +75,10 @@ userSchema.methods.changePasswordAfter = function (JWTTimeStamp) {
     }
     return false;
 }
+userSchema.pre(/^find/ , function (next) {
+    this.find({active : {$ne : false} });
+    next();
+})
 userSchema.methods.creatPasswordRestToken = function (){
     restToken = crypto.randomBytes(32).toString('hex');
     this.passwordRestToken = crypto

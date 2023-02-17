@@ -74,9 +74,8 @@ exports.protect = catchAsync(async (req , res , next ) =>{
 
 exports.restrictTo = (...roles) =>{
     return (req , res , next) =>{
-        console.log(req.user.role);
         if (!roles.includes(req.user.role)){
-            return next(new appError('you do not have permission tp preform this action' , 403));
+            return next(new appError('you do not have permission to preform this action' , 403));
         }
         next();
     }
