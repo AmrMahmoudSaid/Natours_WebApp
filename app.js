@@ -8,6 +8,7 @@ const rateLimit = require('express-rate-limit');
 const appError = require('./utilities/appError');
 const  toursRouter = require('./routes/tourRoutes');
 const usersRouter = require('./routes/userRoutes');
+const reviewRouter = require('./routes/reviewRoutes');
 const globalErrorHandler = require('./controllers/errorControllrt');
 
 const app = express();
@@ -58,6 +59,7 @@ app.use((req,res,next)=>{
 
 app.use('/api/v1/tours' , toursRouter);
 app.use('/api/v1/users' , usersRouter);
+app.use('/api/v1/reviews' , reviewRouter);
 app.all("*",(req , res ,next)=>{
     next(new appError(`cant find ${req.originalUrl} in our server`,404));
 })
