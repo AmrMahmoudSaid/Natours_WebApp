@@ -18,7 +18,11 @@ const tourSchema = new mongoose.Schema({
     },
     difficulty:{
         type : String ,
-        required: [true, 'A tour must have a difficulty']
+        required: [true, 'A tour must have a difficulty'],
+        enum : [{
+            values : ['easy','medium','difficult'],
+            message :'Difficulty is either : easy , medium, difficult'
+        }]
     },
     ratingAverage : {
         type : Number,
@@ -55,7 +59,34 @@ const tourSchema = new mongoose.Schema({
     secretTour : {
         type : Boolean ,
         default : false
-    }
+    } ,
+    startLocation : {
+        type:{
+            type : String,
+            default : 'Point',
+            enum : ['Point']
+        },
+        coordinates : [Number],
+        address : String,
+        description : String
+    },
+    locations:[{
+        type:{
+            type : String,
+            default : 'Point',
+            enum : ['Point']
+        },
+        coordinates : [Number],
+        address : String,
+        description : String,
+        day : Number
+    }],
+    guides : [
+        {
+            type : mongoose.Schema.ObjectId,
+            ref : 'User'
+        }
+    ]
 },{
     toJSON : {virtuals : true},
     toObject : {virtuals : true}
@@ -73,6 +104,15 @@ tourSchema.pre(/^find/, function (next){
     this.find({secretTour : { $ne : true}});
     next();
 });
+tourSchema.pre(/^find/, function (next){
+    this.populate({
+        path: 'guides' ,
+        select : '-__v -passwordChangedAt'
+
+    });
+    next();
+});
+
 // tourSchema.pre('findOne', function (next){
 //     this.find({secretTour : { $ne : true}});
 //     next();
