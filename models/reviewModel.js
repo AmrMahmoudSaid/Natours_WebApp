@@ -32,12 +32,13 @@ reviewSchema.pre(/^find/, function (next){
     this.populate({
         path: 'user' ,
         select : 'name photo'
-    }).populate({
-        path: 'tour' ,
-        select : 'name'
-    });
+    })
+    //     .populate({
+    //     path: 'tour' ,
+    //     select : 'name'
+    // });
     next();
 });
-const review = mongoose.model('review' , reviewSchema);
+const review = mongoose.model('Review' , reviewSchema);
 
 module.exports = review;

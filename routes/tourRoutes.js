@@ -1,6 +1,7 @@
 const express = require(`express`);
 const  toursController = require('../controllers/tourController');
 const authController = require('../controllers/authController');
+const reviewRouter = require('../routes/reviewRoutes');
 const router = express.Router();
 // router.param('id' , (req, res ,next ,vel)=>{
 //     toursController.checkID(req ,res,next,vel);
@@ -27,5 +28,8 @@ router
 
 router
     .route('/monthly-plan/:year').get(toursController.getMonthyplan);
+
+router.use('/:tourId/reviews' , reviewRouter);
+
 
 module.exports =router;
