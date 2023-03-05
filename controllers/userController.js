@@ -1,6 +1,7 @@
 const User = require('../models/userModel');
 const catchAsync =require ('../utilities/catchAsync');
 const appError = require('../utilities/appError');
+const factory = require('./handlerFactory');
 
 const filterObj = (obj , ...allowedFiled) =>{
     const nweObject = {};
@@ -12,16 +13,6 @@ const filterObj = (obj , ...allowedFiled) =>{
     return nweObject;
 }
 
-exports.gerAlluser = catchAsync(async (req ,res , next) =>{
-    const users = await User.find();
-    res.status(200).json({
-        status :'success' ,
-        results : users.length,
-        data : {
-            users
-        }
-    });
-});
 
 exports.updateMe = catchAsync(async(req , res ,next)=>{
     if (req.body.password || req.body.passwordConfirm){
@@ -48,70 +39,17 @@ exports.deleteMe = catchAsync(async (req , res , next) =>{
    });
 });
 exports.creatUser =(req ,res) =>{
-    const  newID = users[users.length-1].id+1;
-    const newUser = Object.assign({id : newID}, req.body );
-    users.push(newUser);
-    fs.writeFile(`./dev-data/data/users.json` , JSON.stringify(users), err=>{
-        if(err){
-            res.status(404).json({
-                status : 'fail' ,
-                message : 'Invalid'
-            })
-        }else {
-            res.status(201).json({
-                status :'success' ,
-                data : {
-                    newUser
-                }
-            })
-        }
+    res.status(500).json({
+        status : 'error' ,
+        message : 'this ROUTE is not defined , use /singup  '
     })
-}
-exports.getUser = (req ,res)=>{
-    const  idd =req.params.id;
-    const user = users.find(el =>el._id ===idd);
-    if (!user){
-        res.status(404).json({
-            status : 'fail' ,
-            message : 'Invalid ID'
-        })
-    } else {
-        res.status(200).json({
-            status :'success' ,
-            data : {
-                user
-            }
-        })
-    }
 };
 
-exports.deleteUser = (req , res) =>{
-    const id = req.params.id ;
-    const user =users.find(el => el._id === id);
-    if(!user){
-        res.status(404).json({
-            status : 'fail' ,
-            message : 'Invalid ID'
-        })
-    }else {
-        res.status(204).json({
-            status : 'success' ,
-            data : null
-        })
-    }
-};
-exports.updateUser = (req , res) =>{
-    const id = req.params.id ;
-    const user =users.find(el => el._id === id);
-    if(!user){
-        res.status(404).json({
-            status : 'fail' ,
-            message : 'Invalid ID'
-        })
-    }else {
-        res.status(200).json({
-            status : 'success' ,
-            message : '<Updated user hear...>'
-        })
-    }
-};
+exports.gerAlluser = factory.getAll(User);
+
+exports.getUser = factory.getOne(User);
+
+exports.deleteUser = factory.deleteOne(User);
+
+//Dont update password
+exports.updateUser = factory.updateOne(User);
