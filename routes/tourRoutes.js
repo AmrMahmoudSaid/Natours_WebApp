@@ -8,8 +8,8 @@ const router = express.Router();
 // })
 router
     .route('/')
-    .get(authController.protect,toursController.getAllTours)
-    .post(toursController.creatTour);
+    .get(toursController.getAllTours)
+    .post(authController.protect,authController.restrictTo('admin','lead-guide'),toursController.creatTour);
 router
     .route('/tour-stats')
     .get(toursController.getTourStats);
@@ -24,10 +24,18 @@ router
         authController.restrictTo('admin' , 'lead-guide'),
         toursController.deleteTour
     )
-    .patch(toursController.updateTour);
+    .patch(
+        authController.protect ,
+        authController.restrictTo('admin' , 'lead-guide'),
+        toursController.updateTour
+    );
 
 router
-    .route('/monthly-plan/:year').get(toursController.getMonthyplan);
+    .route('/monthly-plan/:year').get(
+    authController.protect ,
+    authController.restrictTo('admin' , 'lead-guide' , 'guide'),
+    toursController.getMonthyplan
+);
 
 router.use('/:tourId/reviews' , reviewRouter);
 
