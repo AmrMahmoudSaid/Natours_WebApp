@@ -18,7 +18,10 @@ router
     .get(toursController.aliasTopTours,toursController.getAllTours);
 router
     .route('/tours-within/:distance/center/:latlng/:unit')
-    .get(toursController.tourWithin)
+    .get(toursController.tourWithin);
+router
+    .route('/distances/:latlng/unit/:unit')
+    .get(toursController.getDistance);
 router
     .route('/:id')
     .get(toursController.getTour)
