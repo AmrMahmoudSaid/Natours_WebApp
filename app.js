@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require(`express`);
 const morgan = require('morgan');
 const helmet = require('helmet');
@@ -12,10 +13,9 @@ const reviewRouter = require('./routes/reviewRoutes');
 const globalErrorHandler = require('./controllers/errorControllrt');
 
 const app = express();
-// process.env.NODE_ENV= 'production';
-
-//Global middlewares
-
+app.set('view engine' , 'pug');
+//use path because will automatically create a correct path
+app.set('views' , path.join(__dirname,'views'))
 //http security
 app.use(helmet());
  // limit req for the same IP
@@ -56,7 +56,9 @@ app.use((req,res,next)=>{
     req.requestTime =new Date().toDateString();
     next();
 })
-
+app.get('/', (req ,res ,next) =>{
+    res.status(200).render('base');
+});
 app.use('/api/v1/tours' , toursRouter);
 app.use('/api/v1/users' , usersRouter);
 app.use('/api/v1/reviews' , reviewRouter);
