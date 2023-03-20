@@ -17,6 +17,9 @@ router
     .route('/top-5-tours')
     .get(toursController.aliasTopTours,toursController.getAllTours);
 router
+    .route('/tours-within/:distance/center/:latlng/:unit')
+    .get(toursController.tourWithin)
+router
     .route('/:id')
     .get(toursController.getTour)
     .delete(
