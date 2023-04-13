@@ -59,6 +59,8 @@ exports.protect = catchAsync(async (req , res , next ) =>{
     let token;
     if (req.headers.authorization &&req.headers.authorization.startsWith('Bearer')){
         token = req.headers.authorization.split(' ')[1];
+    }else if (req.cookies.jwt){
+        token = req.cookies.jwt;
     }
     if (!token){
         return next(new appError('You are not logged in' , 401));
@@ -76,8 +78,46 @@ exports.protect = catchAsync(async (req , res , next ) =>{
     }
 
     req.user =uuser;
+    //to used in template
+    res.locals.user = uuser;
     next();
-})
+});
+
+exports.logout = (req , res ) =>{
+    res.cookie('jwt', 'loggedout', {
+        expires: new Date(Date.now() + 10 * 1000),
+        httpOnly: true
+    });
+    res.status(200).json({
+        status : 'success'
+    });
+};
+//Only for render page
+exports.isLoggedIn = async (req , res , next ) =>{
+// get token
+    let token;
+    if (req.cookies.jwt) {
+        try{
+            //verification token
+            if(req.cookies.jwt==='loggedout') return  next();
+            const decoded = await promisify(jwt.verify)(req.cookies.jwt, process.env.JWT_SECRETKEY);
+            const uuser = await User.findById(decoded.id);
+            if (!uuser) {
+                return next();
+            }
+            if (uuser.changePasswordAfter(decoded.iat)) {
+                return next();
+            }
+            res.locals.user = uuser;
+            return next();
+        }catch (e) {
+            return next();
+        }
+        
+    }
+    next();
+};
+
 
 exports.restrictTo = (...roles) =>{
     return (req , res , next) =>{
@@ -142,13 +182,11 @@ exports.changePassword = catchAsync(async (req ,res ,next) =>{
         return next(new appError('Token is invalid or has expired',400))
     }
 
-    if (!user.correctPassword(req.body.oldpassword,user.password)){
+    if (!(await user.correctPassword(req.body.oldpassword,user.password))){
         return next(new appError('The old password is wrong'));
     }
-
     user.password = req.body.newPassword;
     user.passwordConfirm = req.body.newPasswordConfirm;
     await user.save();
-
     sendToken(user,200,res);
 });

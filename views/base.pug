@@ -1,9 +1,23 @@
 doctype
 html
     head
-        title Natours
-        //<link rel="stylesheet" href="css/style.css" />
-        link(rel='stylesheet' href='css/style.css')
-        link(rel='shortcut icon' type='image/png' href='img/icon.png')
+        block head
+            meta(charset='UTF-8')
+            meta(name='viewport' content='width=device-width, initial-scale=1.0' )
+            title Natours | #{title}
+            //<link rel="stylesheet" href="css/style.css" />
+            link(rel='stylesheet' href='/css/style.css')
+            link(rel='shortcut icon' type='image/png' href='/img/icon.png')
+            link(rel='stylesheet' href='https://fonts.googleapis.com/css?family=Lato:300,300i,700')
     body
-        h1 Amr Mahmoud Said
+        //HEADER
+        include _header
+        // CONTENT
+        block content
+            h1 This is a palceholder heading
+        //FOOTER
+        include _footer
+        //script(src='https://cdnjs.cloudflare.com/ajax/libs/axios/1.3.5/axios.min.js')
+        //script(src='/js/mapbox.js')
+        //script(src='/js/login.js')
+        script(src='/js/bundle.js')

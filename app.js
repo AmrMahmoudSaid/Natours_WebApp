@@ -10,8 +10,9 @@ const appError = require('./utilities/appError');
 const  toursRouter = require('./routes/tourRoutes');
 const usersRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
+const viewRouter = require('./routes/viewRoutes');
 const globalErrorHandler = require('./controllers/errorControllrt');
-
+const cookieParser = require('cookie-parser');
 const app = express();
 app.set('view engine' , 'pug');
 //use path because will automatically create a correct path
@@ -25,7 +26,6 @@ const limiter = rateLimit.rateLimit({
     message : 'Too many requests from this IP , try again in an hour'
 });
 app.use('/api' , limiter);
-
 // develoment logging
 if (process.env.NODE_ENV==='development'){
     app.use(morgan('dev'));
@@ -33,7 +33,9 @@ if (process.env.NODE_ENV==='development'){
 }
 //Body parser
 app.use(express.json({limit : '10kb'}));
-
+//for form
+app.use(express.urlencoded({extended :true,limit:'10kb'}));
+app.use(cookieParser());
 //Data sanitization against NoSQL query
 app.use(mongoSanitize());
 
@@ -56,9 +58,7 @@ app.use((req,res,next)=>{
     req.requestTime =new Date().toDateString();
     next();
 })
-app.get('/', (req ,res ,next) =>{
-    res.status(200).render('base');
-});
+app.use('/' , viewRouter);
 app.use('/api/v1/tours' , toursRouter);
 app.use('/api/v1/users' , usersRouter);
 app.use('/api/v1/reviews' , reviewRouter);

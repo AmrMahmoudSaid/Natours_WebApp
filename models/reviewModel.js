@@ -64,14 +64,17 @@ reviewSchema.statics.calcAverageRating = async function (tourID) {
         });
     } else {
         await Tour.findByIdAndUpdate(tourID , {
-            ratingAverage :0 ,
-            ratingQuantity : 4.5
+            ratingAverage :4.5 ,
+            ratingQuantity : 0
         });
     }
 
 };
 
 reviewSchema.post('save' ,function () {
+    this.constructor.calcAverageRating(this.tour);
+});
+reviewSchema.post('creat' ,function () {
     this.constructor.calcAverageRating(this.tour);
 });
 reviewSchema.pre(/^findOneAnd/,async function (next){

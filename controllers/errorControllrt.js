@@ -20,42 +20,69 @@ const handelJsonWebTokenError = () =>{
     return new appError(message, 401);
 }
 const handelJWTexpired = () => new appError('your token is expired. please login again' , 401);
-const sendErrorForDev = (err , res) =>{
-    console.log(err);
-    res.status(err.statusCode).json({
-        status: err.status ,
-        error : err ,
-        message : err.message,
-        stack : err.stack
-    })
-}
-
-const sendErrorForProd =(err ,res) =>{
-    //trusted error
-    if (err.isOperational){
+const sendErrorForDev = (err ,req, res) =>{
+    //api
+    if(req.originalUrl.startsWith('/api')){
+        console.log(err);
         res.status(err.statusCode).json({
             status: err.status ,
-            message : err.message
+            error : err ,
+            message : err.message,
+            stack : err.stack
         })
     }else {
-        //log error
+        //frontEnd
         console.error('error  :',err)
-        //unknown error
-        res.status(500).json({
-            status:'error' ,
-            massage : 'Something went very wrong'
+        res.status(err.statusCode).render('error',{
+            title : 'Something went wrong!' ,
+            msg : err.message
         })
     }
 
+}
+
+const sendErrorForProd =(err,req ,res) =>{
+    //API
+    //trusted error
+    if(req.originalUrl.startsWith('/api')){
+        if (err.isOperational){
+            return res.status(err.statusCode).json({
+                status: err.status ,
+                message : err.message
+            })
+        }else {
+            //log error
+            console.error('error  :',err)
+            //unknown error
+            return res.status(500).json({
+                status:'error' ,
+                massage : 'Something went very wrong'
+            })
+        }
+    }
+    //frontEnd
+    console.error('error  :',err)
+    if (err.isOperational){
+        res.status(err.statusCode).render('error',{
+            title : 'Something went wrong!' ,
+            msg : err.message
+        })
+    }else {
+        res.status(err.statusCode).render('error',{
+            title : 'Something went wrong!' ,
+            msg : 'please try again later'
+        });
+    }
 }
 
 module.exports = (err, req , res , next) =>{
     err.statusCode = err.statusCode || 500;
     err.status = err.status ||'error';
     if (process.env.NODE_ENV==='development'){
-       sendErrorForDev(err,res);
+       sendErrorForDev(err,req,res);
     } else if (process.env.NODE_ENV==='production') {
         let error = {...err};
+        error.message=err.message;
         //error from database
         //1) invalid data
         if (error.name ==='CastError') error = handelCastErrorDB(error);
@@ -66,6 +93,6 @@ module.exports = (err, req , res , next) =>{
         //4) token error
         if (error.name==='JsonWebTokenError') error = handelJsonWebTokenError();
         if (error.name ==='TokenExpiredError') error = handelJWTexpired();
-        sendErrorForProd(error,res);
+        sendErrorForProd(error,req,res);
     }
 }
