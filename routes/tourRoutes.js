@@ -33,6 +33,8 @@ router
     .patch(
         authController.protect ,
         authController.restrictTo('admin' , 'lead-guide'),
+        toursController.uploadTourimages,
+        toursController.resizeTourImages,
         toursController.updateTour
     );
 
