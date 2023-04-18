@@ -10,6 +10,7 @@ const appError = require('./utilities/appError');
 const  toursRouter = require('./routes/tourRoutes');
 const usersRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
+const bookingRouter = require('./routes/bookingRoutes');
 const viewRouter = require('./routes/viewRoutes');
 const globalErrorHandler = require('./controllers/errorControllrt');
 const cookieParser = require('cookie-parser');
@@ -62,6 +63,8 @@ app.use('/' , viewRouter);
 app.use('/api/v1/tours' , toursRouter);
 app.use('/api/v1/users' , usersRouter);
 app.use('/api/v1/reviews' , reviewRouter);
+app.use('/api/v1/booking' , bookingRouter);
+
 app.all("*",(req , res ,next)=>{
     next(new appError(`cant find ${req.originalUrl} in our server`,404));
 })
