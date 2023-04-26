@@ -2,6 +2,7 @@ const express = require(`express`);
 const  toursController = require('../controllers/tourController');
 const authController = require('../controllers/authController');
 const reviewRouter = require('../routes/reviewRoutes');
+const bookingRouter = require('../routes/bookingRoutes');
 const router = express.Router();
 // router.param('id' , (req, res ,next ,vel)=>{
 //     toursController.checkID(req ,res,next,vel);
@@ -46,6 +47,7 @@ router
 );
 
 router.use('/:tourId/reviews' , reviewRouter);
+router.use('/:tourId/booking' ,bookingRouter );
 
 
 module.exports =router;

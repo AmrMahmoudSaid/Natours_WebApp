@@ -1,0 +1,17 @@
+extends baseEmail
+
+block content
+    p Hi #{firstName},
+    p Thank you for your payment for zz with price : pp,
+    p I can confirm that we received this on #{Date.now()}. I have attached a copy of your receipt to this email
+    table.btn.btn-primary(role='presentation', border='0', cellpadding='0', cellspacing='0')
+        tbody
+            tr
+                td(align='left')
+                    table(role='presentation', border='0', cellpadding='0', cellspacing='0')
+                        tbody
+                            tr
+                                td
+                                    a(href=`${url}`, target='_blank') Upload user photo
+    p If you need any help with booking your next tour, please don't hesitate to contact me!
+    p - Amr Mahmoud Said

@@ -30,9 +30,11 @@ module.exports = class Email{
             });
         }
     }
-    async send(template , subject){
+    async send(template , subject ){
         const html = pug.renderFile(`${__dirname}/../views/email/${template}.pug`, {
             firstName : this.firstName ,
+            // tour : tour.name,
+            // price : price,
             url : this.url,
             subject
         });
@@ -51,5 +53,8 @@ module.exports = class Email{
     }
     async sendPasswordRest(){
         await this.send('passwoedRest' , 'Your Password rest token valid for 10 m ')
+    }
+    async sendPayment(){
+        await this.send('paymentEmail','Payment confirmation' )
     }
 }
