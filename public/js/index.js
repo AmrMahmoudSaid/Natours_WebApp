@@ -2,14 +2,14 @@ import {login , logout} from "./login";
 import {displayMap} from "./mapbox";
 import {updateData} from "./updateSettings"
 import {signup} from "./signup";
-
+import {bookTour} from "./stripe";
 const mapBox =document.getElementById('map');
+const bookBtn = document.getElementById('book-tour');
 const loginForm = document.querySelector('.form--login');
 const logoutBtn = document.querySelector('.nav__el--logout');
 const updateSettingsForm = document.querySelector('.form-user-data');
 const updatePassword = document.querySelector('.form-user-password');
 const signupForm = document.querySelector('.form--signup');
-
 if(mapBox){
     const locations = JSON.parse(mapBox.dataset.locations);
     displayMap(locations);
@@ -61,6 +61,14 @@ if (updatePassword){
         document.getElementById('password-current').value='';
         document.getElementById('password').value='';
         document.getElementById('password-confirm').value='';
+    });
+}
+if (bookBtn){
+    bookBtn.addEventListener('click', e => {
+        e.target.textContent = 'Processing...';
+        const { tourId } = e.target.dataset;
+        console.log('amr');
+        bookTour(tourId);
     });
 }
 
