@@ -3,6 +3,7 @@ import {displayMap} from "./mapbox";
 import {updateData} from "./updateSettings"
 import {signup} from "./signup";
 import {bookTour} from "./stripe";
+
 const mapBox =document.getElementById('map');
 const bookBtn = document.getElementById('book-tour');
 const loginForm = document.querySelector('.form--login');
