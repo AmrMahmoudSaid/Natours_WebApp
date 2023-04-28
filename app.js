@@ -14,6 +14,7 @@ const bookingRouter = require('./routes/bookingRoutes');
 const viewRouter = require('./routes/viewRoutes');
 const globalErrorHandler = require('./controllers/errorControllrt');
 const cookieParser = require('cookie-parser');
+const compression = require('compression');
 const app = express();
 app.set('view engine' , 'pug');
 //use path because will automatically create a correct path
@@ -50,7 +51,7 @@ app.use(hpp({
         'maxGroupSize', 'difficulty','price'
     ]
 }));
-
+app.use(compression());
 //server static file
 app.use(express.static(`${__dirname}/public`));
 
