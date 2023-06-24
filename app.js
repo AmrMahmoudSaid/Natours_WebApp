@@ -11,14 +11,20 @@ const  toursRouter = require('./routes/tourRoutes');
 const usersRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
 const bookingRouter = require('./routes/bookingRoutes');
+const bookingController = require('./controllers/bookingController');
 const viewRouter = require('./routes/viewRoutes');
 const globalErrorHandler = require('./controllers/errorControllrt');
 const cookieParser = require('cookie-parser');
 const compression = require('compression');
+const cors = require('cors');
+const body_parser = require('body-parser');
 const app = express();
 app.set('view engine' , 'pug');
 //use path because will automatically create a correct path
 app.set('views' , path.join(__dirname,'views'))
+//implement Cors
+app.use(cors());
+app.options('*',cors());
 //http security
 app.use(helmet());
  // limit req for the same IP
@@ -28,11 +34,15 @@ const limiter = rateLimit.rateLimit({
     message : 'Too many requests from this IP , try again in an hour'
 });
 app.use('/api' , limiter);
+
 // develoment logging
 if (process.env.NODE_ENV==='development'){
     app.use(morgan('dev'));
     console.log(process.env.NODE_ENV);
 }
+
+app.post('/webhook-checkout' ,body_parser({type : 'application/josn'}), bookingController.webhookCheckout )
+
 //Body parser
 app.use(express.json({limit : '10kb'}));
 //for form
@@ -60,6 +70,7 @@ app.use((req,res,next)=>{
     req.requestTime =new Date().toDateString();
     next();
 })
+
 app.use('/' , viewRouter);
 app.use('/api/v1/tours' , toursRouter);
 app.use('/api/v1/users' , usersRouter);
